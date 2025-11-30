@@ -10,8 +10,33 @@ function Login() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Citizen");
 
+  const [captcha, setCaptcha] = useState(generateCaptcha());
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [error, setError] = useState("");
+
+  function generateCaptcha() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "";
+    for (let i = 0; i < 5; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+  }
+
+  const refreshCaptcha = () => {
+    setCaptcha(generateCaptcha());
+    setCaptchaInput("");
+    setError("");
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (captcha !== captchaInput) {
+      setError("❌ CAPTCHA does not match. Try again.");
+      return;
+    }
+
     const success = login(username, password, role);
     if (success) {
       navigate(`/${role.toLowerCase()}`);
@@ -46,6 +71,24 @@ function Login() {
             <option value="Observer">Observer</option>
           </select>
 
+          {/* CAPTCHA BOX */}
+          <div className="captcha-box">
+            <span className="captcha-text">{captcha}</span>
+            <button type="button" className="refresh-btn" onClick={refreshCaptcha}>
+              🔄
+            </button>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Enter CAPTCHA"
+            value={captchaInput}
+            onChange={(e) => setCaptchaInput(e.target.value)}
+            required
+          />
+
+          {error && <p className="error">{error}</p>}
+
           <button type="submit" className="btn">🚀 Login</button>
         </form>
 
@@ -59,11 +102,11 @@ function Login() {
           display: flex;
           justify-content: center;
           align-items: center;
-          background: #f0f4f8; /* Light blue background similar to ECI portal */
+          background: #f0f4f8;
         }
 
         .card {
-          background: #ffffff; /* White card */
+          background: #ffffff;
           padding: 40px;
           border-radius: 16px;
           color: #1a1a1a;
@@ -88,11 +131,44 @@ function Login() {
           background: #f9f9f9;
           color: #1a1a1a;
           font-size: 1rem;
-          outline: none;
         }
 
-        input::placeholder {
-          color: #a0a0a0;
+        .captcha-box {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 12px 0;
+          padding: 10px;
+          background: #e3e7ff;
+          border: 1px solid #b4baff;
+          border-radius: 8px;
+        }
+
+        .captcha-text {
+          font-size: 1.4rem;
+          font-weight: bold;
+          letter-spacing: 4px;
+          color: #1a237e;
+        }
+
+        .refresh-btn {
+          background: #004aad;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 8px;
+          color: white;
+          cursor: pointer;
+          font-size: 1.1rem;
+        }
+
+        .refresh-btn:hover {
+          background: #002f70;
+        }
+
+        .error {
+          color: red;
+          margin-top: 5px;
+          font-size: 0.9rem;
         }
 
         .btn {
@@ -101,11 +177,10 @@ function Login() {
           margin-top: 12px;
           border: none;
           border-radius: 8px;
-          background: #004aad; /* ECI blue */
+          background: #004aad;
           font-weight: bold;
           color: white;
           cursor: pointer;
-          transition: 0.3s;
         }
 
         .btn:hover {
